@@ -1,45 +1,105 @@
 import Notiflix from 'notiflix';
-import { fetchPhoto } from './PixabayApi';
-// import debounce from 'lodash.debounce';
+import SimpleLightbox from 'simplelightbox';
+// Додатковий імпорт стилів
+import 'simplelightbox/dist/simple-lightbox.min.css';
+// import { fetchPhoto } from './PixabayApi';
+import PixabayApi from './PixabayApi.js';
+import LoadMoreBtn from './components/LoadMoreBtn.js';
 
 const form = document.getElementById('search-form');
 const galleryPhoto = document.querySelector('.gallery');
-const btnLoadMore = document.querySelector('.load-more');
-// const DEBOUNCE_DELAY = 300;
+const cards = document.querySelector('.cards');
+// const btnLoadMore = document.querySelector('.load-more');
+
+// Створюємо екземпляр класу для роботи з конструктором та методами класу
+const cardPixabay = new PixabayApi();
+
+// Створюємо екземпляр класу кнопки для роботи з конструктором та методами класу
+const loadMoreBtn = new LoadMoreBtn({
+  selector: '.load-more',
+  isHidden: true,
+});
+
+console.log(cardPixabay);
+console.log(loadMoreBtn);
 
 form.addEventListener('submit', onSearchPhoto);
+loadMoreBtn.button.addEventListener('click', fetchCards);
 
 function onSearchPhoto(e) {
   e.preventDefault();
 
   const search = form.elements.searchQuery.value.trim();
+
+  // У цій строці ми зберігаємо те,що нам приходить з інпуту
+  // в об'єкт нашого запиту
+  cardPixabay.searchQuery = search;
   console.log(search);
-  // clearMarkup();
-  if (search != '') {
-    fetchPhoto(search)
-      .then(({ hits }) => {
-        return renderMarkupPhoto(hits);
+
+  // При сабміті форми скидуємо сторінку на page = 1 та очищуємо вміст сторінки документу
+  cardPixabay.resetPage();
+  clearMarkup();
+
+  // Після сабміту форми-показуємо кнопку
+  loadMoreBtn.show();
+  fetchCards().finally(() => form.reset());
+}
+
+// При натисканні на кнопку будемо робити новий запит
+function fetchCards() {
+  loadMoreBtn.disable();
+
+  return (
+    cardPixabay
+      .getCards()
+      .then(hits => {
+        if (hits.length === 0) throw new Error('No data');
+
+        renderMarkupPhoto(hits);
       })
-      .catch(onError);
-  }
+      // .then(loadMoreBtn.enable())
+      .catch(onError)
+  );
 }
 
 function renderMarkupPhoto(resultsSearch) {
+  cards.style.backgroundColor = '#efe176';
+
   const markup = resultsSearch
     .map(
       resultsSearch =>
-        `<div class="photo-card">
+        `<a href="${resultsSearch.largeImageURL}"><div class="photo-card">
             <img src="${resultsSearch.webformatURL}" alt="${resultsSearch.tags}" loading="lazy" />
             <div class="info">
             <p class="info-item">
-            <b>Likes ${resultsSearch.likes}</b></p>
+            Likes <span class="text">${resultsSearch.likes}</span></p>
             <p class="info-item">
-            <b>Views ${resultsSearch.views}</b></p>
+            Views <span class="text">${resultsSearch.views}</span></p>
             <p class="info-item">
-            <b>Comments ${resultsSearch.comments}</b></p>
+            Comments <span class="text">${resultsSearch.comments}</span></p>
             <p class="info-item">
-            <b>Downloads ${resultsSearch.downloads}</b></p></div></div>`
+            Downloads <span class="text">${resultsSearch.downloads}</span></p></div></div></a>`
     )
     .join('');
   galleryPhoto.innerHTML = markup;
+  loadMoreBtn.enable();
+  lightbox.refresh();
 }
+
+function onError(err) {
+  cards.style.backgroundColor = '#ffffff';
+  loadMoreBtn.hide();
+  Notiflix.Notify.failure(
+    'Sorry, there are no images matching your search query. Please try again.'
+  );
+}
+
+function clearMarkup() {
+  galleryPhoto.innerHTML = '';
+}
+
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+});
