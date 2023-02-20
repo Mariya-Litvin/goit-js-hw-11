@@ -9,7 +9,6 @@ import LoadMoreBtn from './components/LoadMoreBtn.js';
 const form = document.getElementById('search-form');
 const galleryPhoto = document.querySelector('.gallery');
 const cards = document.querySelector('.cards');
-// const btnLoadMore = document.querySelector('.load-more');
 
 // Створюємо екземпляр класу для роботи з конструктором та методами класу
 const cardPixabay = new PixabayApi();
@@ -42,24 +41,25 @@ function onSearchPhoto(e) {
 
   // Після сабміту форми-показуємо кнопку
   loadMoreBtn.show();
-  fetchCards().finally(() => form.reset());
+  fetchCards()
+    .then(totalHits => {
+      Notiflix.Notify.info(`Hooray! We found ${Number(totalHits)} images.`);
+    })
+    .finally(() => form.reset());
 }
 
 // При натисканні на кнопку будемо робити новий запит
 function fetchCards() {
   loadMoreBtn.disable();
 
-  return (
-    cardPixabay
-      .getCards()
-      .then(hits => {
-        if (hits.length === 0) throw new Error('No data');
+  return cardPixabay
+    .getCards()
+    .then(hits => {
+      if (hits.length === 0) throw new Error('No data');
 
-        renderMarkupPhoto(hits);
-      })
-      // .then(loadMoreBtn.enable())
-      .catch(onError)
-  );
+      renderMarkupPhoto(hits);
+    })
+    .catch(onError);
 }
 
 function renderMarkupPhoto(resultsSearch) {
@@ -95,6 +95,7 @@ function onError(err) {
 }
 
 function clearMarkup() {
+  cards.style.backgroundColor = '#ffffff';
   galleryPhoto.innerHTML = '';
 }
 

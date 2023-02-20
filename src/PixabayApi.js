@@ -41,6 +41,9 @@ export default class PixabayApi {
         this.nextPage();
         return hits;
       });
+    // .then(totalHits => {
+    //   console.log(totalHits);
+    // });
   }
 
   // Будемо за допомогою цього методу звертатися
