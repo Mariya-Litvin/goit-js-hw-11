@@ -75,8 +75,13 @@ function fetchCards() {
       }
 
       renderMarkupPhoto(data.hits);
+      scroll();
 
-      if (data.totalHits / cardPixabay.per_page < cardPixabay.page) {
+      if (
+        data.totalHits / cardPixabay.per_page < cardPixabay.page ||
+        data.totalHits < cardPixabay.per_page
+      ) {
+        loadMoreBtn.hide();
         return Notiflix.Notify.info(
           "We're sorry, but you've reached the end of search results."
         );
@@ -108,6 +113,7 @@ function renderMarkupPhoto(resultsSearch) {
   galleryPhoto.innerHTML = markup;
   loadMoreBtn.enable();
   lightbox.refresh();
+  // scroll();
 }
 
 function onError(error) {
@@ -126,3 +132,15 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionPosition: 'bottom',
   captionDelay: 250,
 });
+
+// -----------------------Плавне прокручування сторінки--------------
+function scroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
