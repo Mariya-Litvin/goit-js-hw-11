@@ -6,19 +6,6 @@ const searchParams = new URLSearchParams({
   // per_page: 40,
 });
 
-// function fetchPhoto(name) {
-//   const URL = `https://pixabay.com/api/?q=${name}&${searchParams}`;
-
-//   return fetch(URL).then(response => {
-//     if (!response.ok) {
-//       throw new Error(response.status);
-//     }
-//     return response.json();
-//   });
-// }
-
-// export { fetchPhoto };
-
 export default class PixabayApi {
   constructor() {
     this.per_page = 40;
@@ -36,14 +23,11 @@ export default class PixabayApi {
         }
         return response.json();
       })
-      .then(({ hits }) => {
+      .then(data => {
         // Переключаємо на наступну сторінку при кожному новому запиті
         this.nextPage();
-        return hits;
+        return data;
       });
-    // .then(totalHits => {
-    //   console.log(totalHits);
-    // });
   }
 
   // Будемо за допомогою цього методу звертатися
@@ -56,5 +40,6 @@ export default class PixabayApi {
   // Метод для присвоєння сторінці значення 1 при новому запиті
   resetPage() {
     this.page = 1;
+    this.per_page = 40;
   }
 }

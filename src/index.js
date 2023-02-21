@@ -41,9 +41,13 @@ function onSearchPhoto(e) {
 
   // Після сабміту форми-показуємо кнопку
   loadMoreBtn.show();
+
   fetchCards()
     .then(totalHits => {
-      Notiflix.Notify.info(`Hooray! We found ${Number(totalHits)} images.`);
+      if (totalHits > 0) {
+        console.log(totalHits);
+        Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+      }
     })
     .finally(() => form.reset());
 }
@@ -52,12 +56,31 @@ function onSearchPhoto(e) {
 function fetchCards() {
   loadMoreBtn.disable();
 
+  if (cardPixabay.searchQuery === '') {
+    loadMoreBtn.hide();
+    return Notiflix.Notify.failure(
+      'The search string cannot be empty. Please specify your search query.'
+    );
+  }
   return cardPixabay
     .getCards()
-    .then(hits => {
-      if (hits.length === 0) throw new Error('No data');
-
-      renderMarkupPhoto(hits);
+    .then(data => {
+      if (data.hits.length === 0) {
+        cards.style.backgroundColor = '#ffffff';
+        loadMoreBtn.hide();
+        return Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      }
+      // if (data.hits.length === data.totalHits) {
+      //   loadMoreBtn.hide();
+      //   Notiflix.Notify.info(
+      //     "We're sorry, but you've reached the end of search results."
+      //   );
+      //   console.log(data.hits.length);
+      // }
+      renderMarkupPhoto(data.hits);
+      return data.totalHits;
     })
     .catch(onError);
 }
@@ -86,12 +109,10 @@ function renderMarkupPhoto(resultsSearch) {
   lightbox.refresh();
 }
 
-function onError(err) {
-  cards.style.backgroundColor = '#ffffff';
+function onError(error) {
   loadMoreBtn.hide();
-  Notiflix.Notify.failure(
-    'Sorry, there are no images matching your search query. Please try again.'
-  );
+  console.error(error);
+  // cards.style.backgroundColor = '#ffffff';
 }
 
 function clearMarkup() {
