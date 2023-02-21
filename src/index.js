@@ -46,6 +46,7 @@ function onSearchPhoto(e) {
     .then(totalHits => {
       if (totalHits > 0) {
         console.log(totalHits);
+
         Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
       }
     })
@@ -68,18 +69,18 @@ function fetchCards() {
       if (data.hits.length === 0) {
         cards.style.backgroundColor = '#ffffff';
         loadMoreBtn.hide();
-        return Notiflix.Notify.failure(
+        return Notiflix.Notify.info(
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
-      // if (data.hits.length === data.totalHits) {
-      //   loadMoreBtn.hide();
-      //   Notiflix.Notify.info(
-      //     "We're sorry, but you've reached the end of search results."
-      //   );
-      //   console.log(data.hits.length);
-      // }
+
       renderMarkupPhoto(data.hits);
+
+      if (data.totalHits / cardPixabay.per_page < cardPixabay.page) {
+        return Notiflix.Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
       return data.totalHits;
     })
     .catch(onError);
