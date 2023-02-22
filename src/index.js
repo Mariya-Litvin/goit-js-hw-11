@@ -44,7 +44,6 @@ function onSearchPhoto(e) {
   fetchCards()
     .then(totalHits => {
       if (totalHits > cardPixabay.per_page) {
-        // console.log(totalHits);
         Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
       }
     })
@@ -52,7 +51,7 @@ function onSearchPhoto(e) {
 }
 
 // При натисканні на кнопку будемо робити новий запит
-function fetchCards() {
+async function fetchCards() {
   loadMoreBtn.disable();
 
   if (cardPixabay.searchQuery === '' || cardPixabay.searchQuery === ' ') {
@@ -61,29 +60,63 @@ function fetchCards() {
       'The search string cannot be empty. Please specify your search query.'
     );
   }
-  return cardPixabay
-    .getCards()
-    .then(data => {
-      if (data.hits.length === 0) {
-        cards.style.backgroundColor = '#ffffff';
-        loadMoreBtn.hide();
-        return Notiflix.Notify.info(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      }
+  try {
+    const data = await cardPixabay.getCards();
+    const hits = data.hits;
+    const totalHits = data.totalHits;
 
-      if (data.hits.length < cardPixabay.per_page) {
-        loadMoreBtn.hide();
-        Notiflix.Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      }
+    if (hits.length === 0) {
+      cards.style.backgroundColor = '#ffffff';
+      loadMoreBtn.hide();
+      return Notiflix.Notify.info(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
+    if (hits.length < cardPixabay.per_page) {
+      loadMoreBtn.hide();
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
+    renderMarkupPhoto(hits);
+    scroll();
+    loadMoreBtn.enable();
+    lightbox.refresh();
+    return totalHits;
+  } catch (error) {
+    loadMoreBtn.hide();
+    console.error(error);
+  }
 
-      renderMarkupPhoto(data.hits);
-      scroll();
-      return data.totalHits;
-    })
-    .catch(onError);
+  // if (cardPixabay.searchQuery === '' || cardPixabay.searchQuery === ' ') {
+  //   loadMoreBtn.hide();
+  //   return Notiflix.Notify.failure(
+  //     'The search string cannot be empty. Please specify your search query.'
+  //   );
+  // }
+  // return cardPixabay
+  //   .getCards()
+  //   .then(data => {
+  //     if (data.hits.length === 0) {
+  //       cards.style.backgroundColor = '#ffffff';
+  //       loadMoreBtn.hide();
+  //       return Notiflix.Notify.info(
+  //         'Sorry, there are no images matching your search query. Please try again.'
+  //       );
+  //     }
+
+  //     if (data.hits.length < cardPixabay.per_page) {
+  //       loadMoreBtn.hide();
+  //       Notiflix.Notify.info(
+  //         "We're sorry, but you've reached the end of search results."
+  //       );
+  //     }
+
+  //     renderMarkupPhoto(data.hits);
+  //     scroll();
+  //     return data.totalHits;
+  //   })
+  //   .catch(onError);
 }
 
 function renderMarkupPhoto(resultsSearch) {
@@ -106,15 +139,13 @@ function renderMarkupPhoto(resultsSearch) {
     )
     .join('');
   galleryPhoto.insertAdjacentHTML('beforeend', markup);
-  loadMoreBtn.enable();
-  lightbox.refresh();
 }
 
-function onError(error) {
-  loadMoreBtn.hide();
-  console.error(error);
-  // cards.style.backgroundColor = '#ffffff';
-}
+// function onError(error) {
+//   loadMoreBtn.hide();
+//   console.error(error);
+//   // cards.style.backgroundColor = '#ffffff';
+// }
 
 function clearMarkup() {
   cards.style.backgroundColor = '#ffffff';
