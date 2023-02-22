@@ -2,7 +2,6 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 // Додатковий імпорт стилів
 import 'simplelightbox/dist/simple-lightbox.min.css';
-// import { fetchPhoto } from './PixabayApi';
 import PixabayApi from './PixabayApi.js';
 import LoadMoreBtn from './components/LoadMoreBtn.js';
 
@@ -19,8 +18,8 @@ const loadMoreBtn = new LoadMoreBtn({
   isHidden: true,
 });
 
-console.log(cardPixabay);
-console.log(loadMoreBtn);
+// console.log(cardPixabay);
+// console.log(loadMoreBtn);
 
 form.addEventListener('submit', onSearchPhoto);
 loadMoreBtn.button.addEventListener('click', fetchCards);
@@ -33,7 +32,7 @@ function onSearchPhoto(e) {
   // У цій строці ми зберігаємо те,що нам приходить з інпуту
   // в об'єкт нашого запиту
   cardPixabay.searchQuery = search;
-  console.log(search);
+  // console.log(search);
 
   // При сабміті форми скидуємо сторінку на page = 1 та очищуємо вміст сторінки документу
   cardPixabay.resetPage();
@@ -45,8 +44,7 @@ function onSearchPhoto(e) {
   fetchCards()
     .then(totalHits => {
       if (totalHits > 0) {
-        console.log(totalHits);
-
+        // console.log(totalHits);
         Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
       }
     })
@@ -57,7 +55,7 @@ function onSearchPhoto(e) {
 function fetchCards() {
   loadMoreBtn.disable();
 
-  if (cardPixabay.searchQuery === '') {
+  if (cardPixabay.searchQuery === '' || cardPixabay.searchQuery === ' ') {
     loadMoreBtn.hide();
     return Notiflix.Notify.failure(
       'The search string cannot be empty. Please specify your search query.'
@@ -77,15 +75,13 @@ function fetchCards() {
       renderMarkupPhoto(data.hits);
       scroll();
 
-      if (
-        data.totalHits / cardPixabay.per_page < cardPixabay.page ||
-        data.totalHits < cardPixabay.per_page
-      ) {
+      if (data.totalHits <= cardPixabay.page * cardPixabay.per_page) {
         loadMoreBtn.hide();
         return Notiflix.Notify.info(
           "We're sorry, but you've reached the end of search results."
         );
       }
+
       return data.totalHits;
     })
     .catch(onError);
@@ -110,10 +106,9 @@ function renderMarkupPhoto(resultsSearch) {
             Downloads <span class="text">${resultsSearch.downloads}</span></p></div></div></a>`
     )
     .join('');
-  galleryPhoto.innerHTML = markup;
+  galleryPhoto.insertAdjacentHTML('beforeend', markup);
   loadMoreBtn.enable();
   lightbox.refresh();
-  // scroll();
 }
 
 function onError(error) {
