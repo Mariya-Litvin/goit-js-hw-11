@@ -43,7 +43,7 @@ function onSearchPhoto(e) {
 
   fetchCards()
     .then(totalHits => {
-      if (totalHits > 0) {
+      if (totalHits > cardPixabay.per_page) {
         // console.log(totalHits);
         Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
       }
@@ -72,16 +72,15 @@ function fetchCards() {
         );
       }
 
-      renderMarkupPhoto(data.hits);
-      scroll();
-
-      if (data.totalHits <= cardPixabay.page * cardPixabay.per_page) {
+      if (data.hits.length < cardPixabay.per_page) {
         loadMoreBtn.hide();
-        return Notiflix.Notify.info(
+        Notiflix.Notify.info(
           "We're sorry, but you've reached the end of search results."
         );
       }
 
+      renderMarkupPhoto(data.hits);
+      scroll();
       return data.totalHits;
     })
     .catch(onError);
