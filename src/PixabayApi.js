@@ -17,20 +17,8 @@ export default class PixabayApi {
   async getCards() {
     const URL = `https://pixabay.com/api/?q=${this.searchQuery}&${searchParams}&page=${this.page}&per_page=${this.per_page}`;
 
-    // return fetch(URL)
-    //   .then(response => {
-    //     if (!response.ok) {
-    //       throw new Error(response.status);
-    //     }
-    //     return response.json();
-    //   })
-    //   .then(data => {
-    //     // Переключаємо на наступну сторінку при кожному новому запиті
-    //     this.nextPage();
-    //     return data;
-    //   });
-
     const response = await axios.get(URL);
+    // Переключаємо на наступну сторінку при кожному новому запиті
     this.nextPage();
     return response.data;
   }

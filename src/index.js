@@ -87,36 +87,6 @@ async function fetchCards() {
     loadMoreBtn.hide();
     console.error(error);
   }
-
-  // if (cardPixabay.searchQuery === '' || cardPixabay.searchQuery === ' ') {
-  //   loadMoreBtn.hide();
-  //   return Notiflix.Notify.failure(
-  //     'The search string cannot be empty. Please specify your search query.'
-  //   );
-  // }
-  // return cardPixabay
-  //   .getCards()
-  //   .then(data => {
-  //     if (data.hits.length === 0) {
-  //       cards.style.backgroundColor = '#ffffff';
-  //       loadMoreBtn.hide();
-  //       return Notiflix.Notify.info(
-  //         'Sorry, there are no images matching your search query. Please try again.'
-  //       );
-  //     }
-
-  //     if (data.hits.length < cardPixabay.per_page) {
-  //       loadMoreBtn.hide();
-  //       Notiflix.Notify.info(
-  //         "We're sorry, but you've reached the end of search results."
-  //       );
-  //     }
-
-  //     renderMarkupPhoto(data.hits);
-  //     scroll();
-  //     return data.totalHits;
-  //   })
-  //   .catch(onError);
 }
 
 function renderMarkupPhoto(resultsSearch) {
@@ -140,12 +110,6 @@ function renderMarkupPhoto(resultsSearch) {
     .join('');
   galleryPhoto.insertAdjacentHTML('beforeend', markup);
 }
-
-// function onError(error) {
-//   loadMoreBtn.hide();
-//   console.error(error);
-//   // cards.style.backgroundColor = '#ffffff';
-// }
 
 function clearMarkup() {
   cards.style.backgroundColor = '#ffffff';
